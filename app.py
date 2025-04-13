@@ -1,5 +1,5 @@
 # Install necessary libraries:
-# pip install fastapi uvicorn google-generativeai PyPDF2 python-multipart
+# pip install fastapi uvicorn google-generativeai PyPDF2 python-multipart python-dotenv
 
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
@@ -7,9 +7,15 @@ import google.generativeai as genai
 import PyPDF2
 import os
 from typing import Optional
+from dotenv import load_dotenv
 
-# Replace with your actual Gemini API key
-GOOGLE_API_KEY = "AIzaSyAP349xdo8xgbrBHyBxwIReiFnhFV946Rc"
+# Load environment variables
+load_dotenv()
+
+# Get API key from environment variable
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable is not set")
 
 # Configure Gemini API
 genai.configure(api_key=GOOGLE_API_KEY)
