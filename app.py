@@ -170,13 +170,21 @@ async def process_pdf(
 
         # Extract JSON from the response
         response_text = response.text
-        logger.info("Response text:", response_text)
         if response_text.startswith("```json"):
             # Remove the markdown code block markers
             json_str = response_text.replace("```json", "").replace("```", "").strip()
             
-            # Clean the JSON string by removing control characters
+            # Clean the JSON string
+            # Remove control characters except newlines and tabs
             json_str = ''.join(char for char in json_str if ord(char) >= 32 or char in '\n\r\t')
+            
+            # Fix any malformed JSON by replacing problematic characters
+            json_str = json_str.replace('\\n', '\\\\n')  # Escape newlines
+            json_str = json_str.replace('\\"', '"')      # Fix escaped quotes
+            json_str = json_str.replace('\\t', '\\\\t')  # Escape tabs
+            
+            # Remove any extra whitespace between words
+            json_str = ' '.join(json_str.split())
             
             try:
                 # Parse the JSON string
