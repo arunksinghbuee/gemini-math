@@ -14,7 +14,7 @@ curl --location 'http://localhost:8000/process_pdf' \
 --form 'pdf_file=@"/C:/Users/615180708/Downloads/ncert-math-ch-1.pdf"' \
 --form 'prompt="\"You are a Class 12 mathematics teacher. Your task is to analyze examples and their solutions from the provided PDF document and present them in a structured JSON format.
 
-## Prompt
+## Prompt for reading examples
 You are a mathematics teacher of class 12.
 Read all the examples and its solutions from attached PDF file and create response in the following format.
 Write explanation of the solution. Make sure that solution should not look like AI generated.
