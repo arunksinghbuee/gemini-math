@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 import google.generativeai as genai
 import PyPDF2
 import os
+import json
 from typing import Optional
 from dotenv import load_dotenv
 
@@ -63,7 +64,20 @@ async def process_pdf(pdf_file: UploadFile = File(...), prompt: str = Form(...))
         # Clean up the temporary file
         os.remove(file_path)
 
-        return JSONResponse(content={"response": response.text})
+        # Extract JSON from the response
+        response_text = response.text
+        if response_text.startswith("```json"):
+            # Remove the markdown code block markers
+            json_str = response_text.replace("```json", "").replace("```", "").strip()
+            try:
+                # Parse the JSON string
+                json_data = json.loads(json_str)
+                return json_data
+            except json.JSONDecodeError as e:
+                raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
+        else:
+            # If the response is not in JSON format, return it as is
+            return {"response": response_text}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
