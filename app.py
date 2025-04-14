@@ -7,8 +7,20 @@ import google.generativeai as genai
 import PyPDF2
 import os
 import json
+import logging
 from typing import Optional
 from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 from formatQuestionJson import format_question_json
 
@@ -35,10 +47,12 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 sequence_numbers = json.load(f)
+            logger.info(f"Loaded sequence numbers from {filename}")
         else:
             sequence_numbers = {key: 10}  # Initialize with 10 for new key
             with open(filename, 'w') as f:
                 json.dump(sequence_numbers, f)
+            logger.info(f"Created new sequence numbers file with initial value 10 for key {key}")
             return 10
         
         current_number = sequence_numbers.get(key, 10) + 10  # Default to 10 if key doesn't exist
@@ -46,10 +60,11 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
         
         with open(filename, 'w') as f:
             json.dump(sequence_numbers, f)
+        logger.info(f"Updated sequence number for key {key} to {current_number}")
             
         return current_number
     except Exception as e:
-        print(f"Error managing sequence numbers: {e}")
+        logger.error(f"Error managing sequence numbers: {e}")
         return 10  # Fallback to 10 if there's any error
 
 def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
@@ -61,10 +76,12 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 question_numbers = json.load(f)
+            logger.info(f"Loaded question numbers from {filename}")
         else:
             question_numbers = {key: 1}  # Initialize with 1 for new key
             with open(filename, 'w') as f:
                 json.dump(question_numbers, f)
+            logger.info(f"Created new question numbers file with initial value 1 for key {key}")
             return 1
         
         current_number = question_numbers.get(key, 1) + 1  # Default to 1 if key doesn't exist
@@ -72,10 +89,11 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
         
         with open(filename, 'w') as f:
             json.dump(question_numbers, f)
+        logger.info(f"Updated question number for key {key} to {current_number}")
             
         return current_number
     except Exception as e:
-        print(f"Error managing question numbers: {e}")
+        logger.error(f"Error managing question numbers: {e}")
         return 1  # Fallback to 1 if there's any error
 
 def extract_text_from_pdf(pdf_path: str) -> str:
@@ -87,8 +105,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             for page_num in range(len(pdf_reader.pages)):
                 page = pdf_reader.pages[page_num]
                 text += page.extract_text()
+        logger.info(f"Successfully extracted text from PDF: {pdf_path}")
         return text
     except Exception as e:
+        logger.error(f"Error reading PDF {pdf_path}: {e}")
         raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
 
 @app.post("/process_pdf")
@@ -104,19 +124,11 @@ async def process_pdf(
     source: str = Form(...),
     chapterNo: str = Form(...)
 ):
-    """
-    Processes a PDF file using Gemini 1.0 Pro based on the provided prompt.
-    Required parameters:
-    - status: Question status (e.g., PUBLISHED)
-    - gradeCode: Grade code (e.g., GRADE_12)
-    - subjectCode: Subject code (e.g., MATH)
-    - topicCode: Topic code (e.g., REL_AND_FUNC)
-    - postedByUserId: User ID who posted the question
-    - board: Board name (e.g., CBSE)
-    - source: Source of the question (e.g., NCERT Maths)
-    - chapterNo: Chapter number
-    """
+    logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
+    logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
+
     if not pdf_file.filename.endswith(".pdf"):
+        logger.error(f"Invalid file format received: {pdf_file.filename}")
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
 
     try:
@@ -125,20 +137,24 @@ async def process_pdf(
         with open(file_path, "wb") as f:
             content = await pdf_file.read()
             f.write(content)
+        logger.info(f"Temporarily saved PDF to {file_path}")
 
         pdf_text = extract_text_from_pdf(file_path)
 
         # Construct the final prompt for Gemini
         final_prompt = f"""Based on the content of the following PDF:\n\n{pdf_text}
-                        Pick up examples from examples no {get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)}
-                        \n\n{prompt}"""
+                         Pick up examples from examples no {get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)}
+                         \n\n{prompt}"""
+        logger.info("Generated final prompt for Gemini")
 
         # Generate content using Gemini 1.0 Pro
         response = model.generate_content(final_prompt)
         response.resolve()  # Ensure the response is fully resolved
+        logger.info("Received response from Gemini", response)
 
         # Clean up the temporary file
         os.remove(file_path)
+        logger.info(f"Removed temporary file: {file_path}")
 
         # Extract JSON from the response
         response_text = response.text
@@ -148,10 +164,11 @@ async def process_pdf(
             try:
                 # Parse the JSON string
                 json_data = json.loads(json_str)
+                logger.info("Successfully parsed JSON response")
                 
                 # Handle both single object and array cases
                 if isinstance(json_data, dict):
-                    # Single question
+                    logger.info("Processing single question")
                     formatted_json = format_question_json(
                         json_data,
                         status=status,
@@ -166,7 +183,7 @@ async def process_pdf(
                     )
                     return formatted_json
                 elif isinstance(json_data, list):
-                    # Multiple questions
+                    logger.info(f"Processing {len(json_data)} questions")
                     formatted_questions = []
                     for question in json_data:
                         formatted_question = format_question_json(
@@ -184,15 +201,19 @@ async def process_pdf(
                         formatted_questions.append(formatted_question)
                     return formatted_questions
                 else:
+                    logger.error("Invalid JSON structure received")
                     raise HTTPException(status_code=500, detail="Invalid JSON structure")
             except json.JSONDecodeError as e:
+                logger.error(f"JSON parsing error: {e}")
                 raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
             except Exception as e:
+                logger.error(f"Error processing questions: {e}")
                 raise HTTPException(status_code=500, detail=f"Error processing questions: {e}")
         else:
-            # If the response is not in JSON format, return it as is
+            logger.warning("Received non-JSON response from Gemini")
             return {"response": response_text}
     except Exception as e:
+        logger.error(f"Error processing request: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
 
 if __name__ == "__main__":
