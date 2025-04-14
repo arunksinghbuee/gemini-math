@@ -10,6 +10,7 @@ import json
 import logging
 from typing import Optional
 from dotenv import load_dotenv
+from createQuestion import createQuestion as create_question_api
 
 # Configure logging
 logging.basicConfig(
@@ -22,6 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+import createQuestion
 from formatQuestionJson import format_question_json
 
 # Load environment variables
@@ -38,7 +40,7 @@ model = genai.GenerativeModel('gemini-1.5-pro')
 
 app = FastAPI()
 
-def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
+def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=False):
     """Get and increment sequence number by 10 from local file."""
     key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}"
     filename = "sequence_numbers.json"
@@ -55,7 +57,12 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
             logger.info(f"Created new sequence numbers file with initial value 10 for key {key}")
             return 10
         
-        current_number = sequence_numbers.get(key, 10) + 10  # Default to 10 if key doesn't exist
+        if should_rollback:
+            current_number = sequence_numbers.get(key, 10) - 10  # Rollback by 10
+            logger.info(f"Rolling back sequence number for key {key} to {current_number}")
+        else:
+            current_number = sequence_numbers.get(key, 10) + 10  # Increment by 10
+        
         sequence_numbers[key] = current_number
         
         with open(filename, 'w') as f:
@@ -67,7 +74,7 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
         logger.error(f"Error managing sequence numbers: {e}")
         return 10  # Fallback to 10 if there's any error
 
-def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
+def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=False):
     """Get and increment question number by 1 from local file."""
     key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}_question"
     filename = "question_numbers.json"
@@ -84,7 +91,12 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
             logger.info(f"Created new question numbers file with initial value 1 for key {key}")
             return 1
         
-        current_number = question_numbers.get(key, 1) + 1  # Default to 1 if key doesn't exist
+        if should_rollback:
+            current_number = question_numbers.get(key, 1) - 1  # Rollback by 1
+            logger.info(f"Rolling back question number for key {key} to {current_number}")
+        else:
+            current_number = question_numbers.get(key, 1) + 1  # Increment by 1
+        
         question_numbers[key] = current_number
         
         with open(filename, 'w') as f:
@@ -158,9 +170,14 @@ async def process_pdf(
 
         # Extract JSON from the response
         response_text = response.text
+        logger.info("Response text:", response_text)
         if response_text.startswith("```json"):
             # Remove the markdown code block markers
             json_str = response_text.replace("```json", "").replace("```", "").strip()
+            
+            # Clean the JSON string by removing control characters
+            json_str = ''.join(char for char in json_str if ord(char) >= 32 or char in '\n\r\t')
+            
             try:
                 # Parse the JSON string
                 json_data = json.loads(json_str)
@@ -169,25 +186,9 @@ async def process_pdf(
                 # Handle both single object and array cases
                 if isinstance(json_data, dict):
                     logger.info("Processing single question")
-                    formatted_json = format_question_json(
-                        json_data,
-                        status=status,
-                        gradeCode=gradeCode,
-                        subjectCode=subjectCode,
-                        topicCode=topicCode,
-                        postedByUserId=postedByUserId,
-                        board=board,
-                        source=source,
-                        chapterNo=chapterNo,
-                        seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
-                    )
-                    return formatted_json
-                elif isinstance(json_data, list):
-                    logger.info(f"Processing {len(json_data)} questions")
-                    formatted_questions = []
-                    for question in json_data:
-                        formatted_question = format_question_json(
-                            question,
+                    try:
+                        formatted_json = format_question_json(
+                            json_data,
                             status=status,
                             gradeCode=gradeCode,
                             subjectCode=subjectCode,
@@ -198,7 +199,53 @@ async def process_pdf(
                             chapterNo=chapterNo,
                             seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
                         )
-                        formatted_questions.append(formatted_question)
+                        # Create question using API
+                        try:
+                            api_response = create_question_api(formatted_json)
+                            logger.info(f"Question created successfully: {api_response}")
+                            return formatted_json
+                        except Exception as e:
+                            logger.error(f"Error creating question via API: {e}")
+                            # Rollback sequence number
+                            get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                            raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
+                    except Exception as e:
+                        logger.error(f"Error formatting question: {e}")
+                        # Rollback sequence number
+                        get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                        raise
+                elif isinstance(json_data, list):
+                    logger.info(f"Processing {len(json_data)} questions")
+                    formatted_questions = []
+                    for question in json_data:
+                        try:
+                            formatted_question = format_question_json(
+                                question,
+                                status=status,
+                                gradeCode=gradeCode,
+                                subjectCode=subjectCode,
+                                topicCode=topicCode,
+                                postedByUserId=postedByUserId,
+                                board=board,
+                                source=source,
+                                chapterNo=chapterNo,
+                                seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
+                            )
+                            # Create question using API
+                            try:
+                                api_response = create_question_api(formatted_question)
+                                logger.info(f"Question created successfully: {api_response}")
+                                formatted_questions.append(formatted_question)
+                            except Exception as e:
+                                logger.error(f"Error creating question via API: {e}")
+                                # Rollback sequence number
+                                get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                                raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
+                        except Exception as e:
+                            logger.error(f"Error formatting question: {e}")
+                            # Rollback sequence number
+                            get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                            raise
                     return formatted_questions
                 else:
                     logger.error("Invalid JSON structure received")

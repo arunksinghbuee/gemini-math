@@ -1,3 +1,6 @@
 .env
 .venv/
 app.log
+create_question.log
+question_numbers.json
+sequence_numbers.json
