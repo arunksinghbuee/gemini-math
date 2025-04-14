@@ -10,6 +10,8 @@ import json
 from typing import Optional
 from dotenv import load_dotenv
 
+from formatQuestionJson import format_question_json
+
 # Load environment variables
 load_dotenv()
 
@@ -38,9 +40,29 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
 
 @app.post("/process_pdf")
-async def process_pdf(pdf_file: UploadFile = File(...), prompt: str = Form(...)):
+async def process_pdf(
+    pdf_file: UploadFile = File(...),
+    prompt: str = Form(...),
+    status: str = Form(...),
+    gradeCode: str = Form(...),
+    subjectCode: str = Form(...),
+    topicCode: str = Form(...),
+    postedByUserId: str = Form(...),
+    board: str = Form(...),
+    source: str = Form(...),
+    chapterNo: str = Form(...)
+):
     """
     Processes a PDF file using Gemini 1.0 Pro based on the provided prompt.
+    Required parameters:
+    - status: Question status (e.g., PUBLISHED)
+    - gradeCode: Grade code (e.g., GRADE_12)
+    - subjectCode: Subject code (e.g., MATH)
+    - topicCode: Topic code (e.g., REL_AND_FUNC)
+    - postedByUserId: User ID who posted the question
+    - board: Board name (e.g., CBSE)
+    - source: Source of the question (e.g., NCERT Maths)
+    - chapterNo: Chapter number
     """
     if not pdf_file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
@@ -72,9 +94,46 @@ async def process_pdf(pdf_file: UploadFile = File(...), prompt: str = Form(...))
             try:
                 # Parse the JSON string
                 json_data = json.loads(json_str)
-                return json_data
+                
+                # Handle both single object and array cases
+                if isinstance(json_data, dict):
+                    # Single question
+                    formatted_json = format_question_json(
+                        json_data,
+                        status=status,
+                        gradeCode=gradeCode,
+                        subjectCode=subjectCode,
+                        topicCode=topicCode,
+                        postedByUserId=postedByUserId,
+                        board=board,
+                        source=source,
+                        chapterNo=chapterNo
+                    )
+                    return formatted_json
+                elif isinstance(json_data, list):
+                    # Multiple questions
+                    formatted_questions = []
+                    for question in json_data:
+                        formatted_question = format_question_json(
+                            question,
+                            status=status,
+                            gradeCode=gradeCode,
+                            subjectCode=subjectCode,
+                            topicCode=topicCode,
+                            postedByUserId=postedByUserId,
+                            board=board,
+                            source=source,
+                            chapterNo=chapterNo
+                        )
+                        formatted_questions.append(formatted_question)
+                    return formatted_questions
+                else:
+                    raise HTTPException(status_code=500, detail="Invalid JSON structure")
+                    
             except json.JSONDecodeError as e:
                 raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error processing questions: {e}")
         else:
             # If the response is not in JSON format, return it as is
             return {"response": response_text}
