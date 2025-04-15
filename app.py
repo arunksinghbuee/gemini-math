@@ -36,7 +36,7 @@ if not GOOGLE_API_KEY:
 
 # Configure Gemini API
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-pro')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 app = FastAPI()
 
