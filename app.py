@@ -162,7 +162,8 @@ async def process_pdf(
         # Generate content using Gemini 1.0 Pro
         response = model.generate_content(final_prompt)
         response.resolve()  # Ensure the response is fully resolved
-        logger.info("Received response from Gemini", response)
+        # response object should be printed as string in following logger
+        logger.info(f"Received response from Gemini: {response}")
 
         # Clean up the temporary file
         os.remove(file_path)
@@ -211,16 +212,18 @@ async def process_pdf(
                         try:
                             api_response = create_question_api(formatted_json)
                             logger.info(f"Question created successfully: {api_response}")
-                            return formatted_json
+                            # if api_response contains "Example 26" or "Consider a function" then throw an error                           
                         except Exception as e:
                             logger.error(f"Error creating question via API: {e}")
                             # Rollback sequence number
                             get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                             raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
                     except Exception as e:
                         logger.error(f"Error formatting question: {e}")
                         # Rollback sequence number
                         get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                         raise
                 elif isinstance(json_data, list):
                     logger.info(f"Processing {len(json_data)} questions")
@@ -248,27 +251,34 @@ async def process_pdf(
                                 logger.error(f"Error creating question via API: {e}")
                                 # Rollback sequence number
                                 get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                                 raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
                         except Exception as e:
                             logger.error(f"Error formatting question: {e}")
                             # Rollback sequence number
                             get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
+                            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                             raise
                     return formatted_questions
                 else:
                     logger.error("Invalid JSON structure received")
+                    get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                     raise HTTPException(status_code=500, detail="Invalid JSON structure")
             except json.JSONDecodeError as e:
                 logger.error(f"JSON parsing error: {e}")
+                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                 raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
             except Exception as e:
                 logger.error(f"Error processing questions: {e}")
+                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                 raise HTTPException(status_code=500, detail=f"Error processing questions: {e}")
         else:
             logger.warning("Received non-JSON response from Gemini")
+            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
             return {"response": response_text}
     except Exception as e:
         logger.error(f"Error processing request: {e}")
+        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
 
 if __name__ == "__main__":
