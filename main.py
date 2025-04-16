@@ -108,7 +108,7 @@ def main():
         #    break
 
         # Add a small delay between calls to avoid overwhelming the server
-        if i < 10:  # Don't wait after the last call
+        if i < 50:  # Don't wait after the last call
             logger.info(f"Waiting before next attempt...")
             time.sleep(10)  # 10 second delay between calls
     

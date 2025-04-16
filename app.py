@@ -135,7 +135,7 @@ async def process_pdf(
     board: str = Form(...),
     source: str = Form(...),
     chapterNo: str = Form(...),
-    lastQuestionNumber: str = Form(...)
+    lastQuestionNumber: int = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
     logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
