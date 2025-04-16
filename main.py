@@ -64,7 +64,8 @@ Sample json response:
             'postedByUserId': '67fabb8bf481c327cbb04d46',
             'board': 'CBSE',
             'source': 'NCERT Maths',
-            'chapterNo': '1'
+            'chapterNo': '1',
+            'lastQuestionNumber': 26
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")

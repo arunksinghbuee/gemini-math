@@ -134,7 +134,8 @@ async def process_pdf(
     postedByUserId: str = Form(...),
     board: str = Form(...),
     source: str = Form(...),
-    chapterNo: str = Form(...)
+    chapterNo: str = Form(...),
+    lastQuestionNumber: str = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
     logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
@@ -153,11 +154,16 @@ async def process_pdf(
 
         pdf_text = extract_text_from_pdf(file_path)
 
+        next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
         # Construct the final prompt for Gemini
         final_prompt = f"""Based on the content of the following PDF:\n\n{pdf_text}
-                         Pick up examples from examples no {get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)}
+                         Pick up examples from examples no {next_question_number}
                          \n\n{prompt}"""
+        if lastQuestionNumber < next_question_number:
+            raise HTTPException(status_code=500, detail="No new questions found")
+
         logger.info("Generated final prompt for Gemini")
+        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
 
         # Generate content using Gemini 1.0 Pro
         response = model.generate_content(final_prompt)
@@ -206,12 +212,13 @@ async def process_pdf(
                             board=board,
                             source=source,
                             chapterNo=chapterNo,
-                            seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
+                            seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                            
                         )
                         # Create question using API
                         try:
                             api_response = create_question_api(formatted_json)
                             logger.info(f"Question created successfully: {api_response}")
+                            next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                            
                             # if api_response contains "Example 26" or "Consider a function" then throw an error                           
                         except Exception as e:
                             logger.error(f"Error creating question via API: {e}")
@@ -246,7 +253,10 @@ async def process_pdf(
                             try:
                                 api_response = create_question_api(formatted_question)
                                 logger.info(f"Question created successfully: {api_response}")
+                                next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                                
                                 formatted_questions.append(formatted_question)
+                                if lastQuestionNumber < next_question_number:
+                                    break
                             except Exception as e:
                                 logger.error(f"Error creating question via API: {e}")
                                 # Rollback sequence number
