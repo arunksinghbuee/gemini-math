@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional
 
 def format_question_json(
     input_data: Dict[str, Any],
-    status: str = "PUBLISHED",
+    status: str = "DRAFT",
     gradeCode: str = "GRADE_12",
     subjectCode: str = "MATH",
     topicCode: str = "REL_AND_FUNC",

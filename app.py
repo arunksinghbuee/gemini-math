@@ -40,8 +40,8 @@ model = genai.GenerativeModel('gemini-2.0-flash')
 
 app = FastAPI()
 
-def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=False):
-    """Get and increment sequence number by 10 from local file."""
+def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
+    """Get current sequence number from local file."""
     key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}"
     filename = "sequence_numbers.json"
     
@@ -50,32 +50,39 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
             with open(filename, 'r') as f:
                 sequence_numbers = json.load(f)
             logger.info(f"Loaded sequence numbers from {filename}")
+            return sequence_numbers.get(key, 10) + 10
         else:
-            sequence_numbers = {key: 10}  # Initialize with 10 for new key
-            with open(filename, 'w') as f:
-                json.dump(sequence_numbers, f)
-            logger.info(f"Created new sequence numbers file with initial value 10 for key {key}")
+            logger.info(f"Sequence numbers file not found, returning default value 10")
             return 10
-        
-        if should_rollback:
-            current_number = sequence_numbers.get(key, 10) - 10  # Rollback by 10
-            logger.info(f"Rolling back sequence number for key {key} to {current_number}")
-        else:
-            current_number = sequence_numbers.get(key, 10) + 10  # Increment by 10
-        
-        sequence_numbers[key] = current_number
-        
-        with open(filename, 'w') as f:
-            json.dump(sequence_numbers, f)
-        logger.info(f"Updated sequence number for key {key} to {current_number}")
-            
-        return current_number
     except Exception as e:
-        logger.error(f"Error managing sequence numbers: {e}")
+        logger.error(f"Error reading sequence numbers: {e}")
         return 10  # Fallback to 10 if there's any error
 
-def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=False):
-    """Get and increment question number by 1 from local file."""
+def update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, sequence_number):
+    """Update sequence number in local file."""
+    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}"
+    filename = "sequence_numbers.json"
+    
+    try:
+        # Get current sequence numbers
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                sequence_numbers = json.load(f)
+        else:
+            sequence_numbers = {}
+
+        # Update the dictionary
+        sequence_numbers[key] = sequence_number
+        
+        # Save back to file
+        with open(filename, 'w') as f:
+            json.dump(sequence_numbers, f)
+        logger.info(f"Updated sequence number for key {key} to {sequence_number}")
+    except Exception as e:
+        logger.error(f"Error updating sequence numbers: {e}")
+
+def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
+    """Get next question number from local file."""
     key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}_question"
     filename = "question_numbers.json"
     
@@ -84,29 +91,36 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
             with open(filename, 'r') as f:
                 question_numbers = json.load(f)
             logger.info(f"Loaded question numbers from {filename}")
+            return question_numbers.get(key, 1) + 1
         else:
-            question_numbers = {key: 1}  # Initialize with 1 for new key
-            with open(filename, 'w') as f:
-                json.dump(question_numbers, f)
-            logger.info(f"Created new question numbers file with initial value 1 for key {key}")
+            logger.info(f"Question numbers file not found, returning default value 1")
             return 1
-        
-        if should_rollback:
-            current_number = question_numbers.get(key, 1) - 1  # Rollback by 1
-            logger.info(f"Rolling back question number for key {key} to {current_number}")
+    except Exception as e:
+        logger.error(f"Error reading question numbers: {e}")
+        return 1  # Fallback to 1 if there's any error
+
+def update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, question_number):
+    """Update question number in local file."""
+    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{chapterNo}_question"
+    filename = "question_numbers.json"
+    
+    try:
+        # Get current question numbers
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                question_numbers = json.load(f)
         else:
-            current_number = question_numbers.get(key, 1) + 1  # Increment by 1
+            question_numbers = {}
         
-        question_numbers[key] = current_number
+        # Update the dictionary
+        question_numbers[key] = question_number
         
+        # Save back to file
         with open(filename, 'w') as f:
             json.dump(question_numbers, f)
-        logger.info(f"Updated question number for key {key} to {current_number}")
-            
-        return current_number
+        logger.info(f"Updated question number for key {key} to {question_number}")
     except Exception as e:
-        logger.error(f"Error managing question numbers: {e}")
-        return 1  # Fallback to 1 if there's any error
+        logger.error(f"Error updating question numbers: {e}")
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text content from a PDF file."""
@@ -163,7 +177,6 @@ async def process_pdf(
             raise HTTPException(status_code=500, detail="No new questions found")
 
         logger.info("Generated final prompt for Gemini")
-        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
 
         # Generate content using Gemini 1.0 Pro
         response = model.generate_content(final_prompt)
@@ -201,6 +214,7 @@ async def process_pdf(
                 # Handle both single object and array cases
                 if isinstance(json_data, dict):
                     logger.info("Processing single question")
+                    next_sequence_number = get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
                     try:
                         formatted_json = format_question_json(
                             json_data,
@@ -212,31 +226,27 @@ async def process_pdf(
                             board=board,
                             source=source,
                             chapterNo=chapterNo,
-                            seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                            
+                            seqNumber=next_sequence_number                            
                         )
                         # Create question using API
                         try:
                             api_response = create_question_api(formatted_json)
+                            update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_sequence_number)
                             logger.info(f"Question created successfully: {api_response}")
-                            next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                            
+                            update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_question_number)                        
                             # if api_response contains "Example 26" or "Consider a function" then throw an error                           
                         except Exception as e:
                             logger.error(f"Error creating question via API: {e}")
-                            # Rollback sequence number
-                            get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
-                            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                             raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
                     except Exception as e:
                         logger.error(f"Error formatting question: {e}")
-                        # Rollback sequence number
-                        get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
-                        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                         raise
                 elif isinstance(json_data, list):
                     logger.info(f"Processing {len(json_data)} questions")
                     formatted_questions = []
                     for question in json_data:
                         try:
+                            next_sequence_number = get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
                             formatted_question = format_question_json(
                                 question,
                                 status=status,
@@ -247,49 +257,77 @@ async def process_pdf(
                                 board=board,
                                 source=source,
                                 chapterNo=chapterNo,
-                                seqNumber=get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
+                                seqNumber=next_sequence_number
                             )
                             # Create question using API
                             try:
                                 api_response = create_question_api(formatted_question)
+                                update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_sequence_number)
+                                update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_question_number)
+                                next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
                                 logger.info(f"Question created successfully: {api_response}")
-                                next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)                                
                                 formatted_questions.append(formatted_question)
                                 if lastQuestionNumber < next_question_number:
                                     break
                             except Exception as e:
                                 logger.error(f"Error creating question via API: {e}")
-                                # Rollback sequence number
-                                get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
-                                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                                 raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
                         except Exception as e:
                             logger.error(f"Error formatting question: {e}")
-                            # Rollback sequence number
-                            get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
-                            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                             raise
                     return formatted_questions
                 else:
                     logger.error("Invalid JSON structure received")
-                    get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                     raise HTTPException(status_code=500, detail="Invalid JSON structure")
             except json.JSONDecodeError as e:
                 logger.error(f"JSON parsing error: {e}")
-                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                 raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
             except Exception as e:
                 logger.error(f"Error processing questions: {e}")
-                get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
                 raise HTTPException(status_code=500, detail=f"Error processing questions: {e}")
         else:
             logger.warning("Received non-JSON response from Gemini")
-            get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
             return {"response": response_text}
     except Exception as e:
         logger.error(f"Error processing request: {e}")
-        get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, should_rollback=True)
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
+
+def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, postedByUserId, board, source, chapterNo, seqNumber):
+    """Format the question JSON with additional metadata."""
+    try:
+        # Ensure json_data is a dictionary
+        if not isinstance(json_data, dict):
+            raise ValueError("Input must be a dictionary")
+
+        # Add metadata fields
+        json_data.update({
+            "status": status,
+            "gradeCode": gradeCode,
+            "subjectCode": subjectCode,
+            "topicCode": topicCode,
+            "postedByUserId": postedByUserId,
+            "board": board,
+            "source": source,
+            "chapterNo": chapterNo,
+            "seqNumber": seqNumber,
+            "seoMetaData": {
+                "en": {
+                    "title": json_data.get("title", {}).get("en", ""),
+                    "description": json_data.get("description", {}).get("en", ""),
+                    "author": postedByUserId
+                },
+                "hi": {
+                    "title": json_data.get("title", {}).get("hi", ""),
+                    "description": json_data.get("description", {}).get("hi", ""),
+                    "author": postedByUserId
+                }
+            }
+        })
+        
+        return json_data
+    except Exception as e:
+        logger.error(f"Error formatting question JSON: {e}")
+        raise
 
 if __name__ == "__main__":
     import uvicorn
