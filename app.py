@@ -311,16 +311,8 @@ def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, p
             "chapterNo": chapterNo,
             "seqNumber": seqNumber,
             "seoMetaData": {
-                "en": {
-                    "title": json_data.get("title", {}).get("en", ""),
-                    "description": json_data.get("description", {}).get("en", ""),
-                    "author": postedByUserId
-                },
-                "hi": {
-                    "title": json_data.get("title", {}).get("hi", ""),
-                    "description": json_data.get("description", {}).get("hi", ""),
-                    "author": postedByUserId
-                }
+                "en": json_data.get("seoMetaData", {}).get("en", ""),
+                "hi": json_data.get("seoMetaData", {}).get("hi", "")
             }
         })
         
