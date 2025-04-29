@@ -80,7 +80,7 @@ def createQuestion(formatted_json):
 
         # Create Question API call
         question_headers = {
-            'Accept-Language': 'hi',
+            'Accept-Language': 'en',
             'Timezone': 'Asia/Kolkata',
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
@@ -90,6 +90,7 @@ def createQuestion(formatted_json):
             formatted_json['previousQuestionId'] = previous_question_id
         
         logger.info("Attempting to create question...")
+        logger.info(f"Formatted JSON: {formatted_json}")
         question_response = requests.post(question_url, headers=question_headers, json=formatted_json)
         question_response.raise_for_status()
         response_data = question_response.json()
