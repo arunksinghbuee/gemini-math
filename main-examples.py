@@ -27,7 +27,7 @@ def call_process_pdf_api(attempt):
         data = {
             'prompt': """You are a mathematics teacher of class 12.
                     Read all the examples and its solutions from attached PDF file.
-                    Title and solution in en language must be exact same as in PDF file.
+                    Title and solution in en language must be exacted same as in PDF file.
                     Example has its solution just after the example. Use that solution rather than creating your own solution.
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
@@ -102,12 +102,6 @@ def main():
         else:
             logger.error(f"Attempt {i}: Failed to process response")
         
-        # if result contains "Example 26" or "Consider a function" then break the loop
-        #if "Example 26" in result or "Consider a function" in result:
-        #    logger.info(f"Breaking loop, reached to last question.")
-        #    break
-
-        # Add a small delay between calls to avoid overwhelming the server
         if i < 50:  # Don't wait after the last call
             logger.info(f"Waiting before next attempt...")
             time.sleep(10)  # 10 second delay between calls
