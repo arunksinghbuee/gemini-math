@@ -36,7 +36,7 @@ def call_process_pdf_api(attempt):
                     Generate and populate the best seoMetadata for respective example.
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
                     title, solution, explanation, seoMetaData must be created for English (en) and Hindi (hi).
-                    Response must be json only. Create response in the following format.
+                    Response must be following json format only. Create response in the following format.
 
 Sample json response:
 {
