@@ -194,10 +194,44 @@ async def process_pdf(
 
         # Extract JSON from the response
         response_text = response.text
+        logger.info(f"Received response from Gemini: {response_text}")
+
+        # Extract JSON from response text
+        json_str = None
         if response_text.startswith("```json"):
             # Remove the markdown code block markers
             json_str = response_text.replace("```json", "").replace("```", "").strip()
-            
+        else:
+            # Try to find JSON in the response text
+            try:
+                # Find the first { to start JSON
+                start_idx = response_text.find('{')
+                if start_idx == -1:
+                    raise ValueError("No JSON object found in response")
+
+                # Find the matching closing brace
+                brace_count = 0
+                end_idx = -1
+                for i in range(start_idx, len(response_text)):
+                    if response_text[i] == '{':
+                        brace_count += 1
+                    elif response_text[i] == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i
+                            break
+
+                if end_idx == -1:
+                    raise ValueError("No matching closing brace found in JSON")
+
+                json_str = response_text[start_idx:end_idx + 1]
+                logger.info(f"Extracted JSON: {json_str}")
+
+            except Exception as e:
+                logger.error(f"Error extracting JSON from response: {e}")
+                raise HTTPException(status_code=500, detail=f"Error extracting JSON from response: {e}")
+
+        if json_str:
             # Clean the JSON string
             # Remove control characters except newlines and tabs
             json_str = ''.join(char for char in json_str if ord(char) >= 32 or char in '\n\r\t')
