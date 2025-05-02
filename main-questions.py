@@ -26,9 +26,9 @@ def call_process_pdf_api(attempt):
         
         data = {
             'prompt': """You are a mathematics teacher of class 12.
-                    Read all the examples from attached PDF file and unserstand how to solve the problem.
                     You need to solve questions provied in the exercise 1.1.
-                    Title in en language must be exact same as in PDF file.
+
+                    Title in en language must be exact same as question in PDF file.
                     Write solution for the each question considering level of class 12.
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
@@ -36,7 +36,11 @@ def call_process_pdf_api(attempt):
                     Generate and populate the best seoMetadata for respective example.
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
                     title, solution, explanation, seoMetaData must be created for English (en) and Hindi (hi).
-                    Response must be following json format only. Create response in the following format.
+                    Please make sure that response must be in JSON format.
+                    Do not provide 'Explanation of the Code and Choices' in the response.
+                    Do not provide 'Important Considerations' in the response.
+                    
+                    Create response in the following json format.
 
 Sample json response:
 {
