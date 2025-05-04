@@ -1,5 +1,5 @@
 # Install necessary libraries:
-# pip install fastapi uvicorn google-generativeai PyPDF2 python-multipart python-dotenv
+# pip install fastapi uvicorn google-generativeai PyPDF2 python-multipart python-dotenv pytesseract pdf2image
 
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
@@ -11,6 +11,8 @@ import logging
 from typing import Optional
 from dotenv import load_dotenv
 from createQuestion import createQuestion as create_question_api
+import pytesseract
+from pdf2image import convert_from_path
 
 # Configure logging
 logging.basicConfig(
@@ -123,14 +125,35 @@ def update_question_number(board, source, subjectCode, gradeCode, topicCode, cha
         logger.error(f"Error updating question numbers: {e}")
 
 def extract_text_from_pdf(pdf_path: str) -> str:
-    """Extracts text content from a PDF file."""
+    """Extracts text content from a PDF file, using OCR if needed."""
     text = ""
     try:
+        # First try regular text extraction
         with open(pdf_path, 'rb') as pdf_file:
             pdf_reader = PyPDF2.PdfReader(pdf_file)
             for page_num in range(len(pdf_reader.pages)):
                 page = pdf_reader.pages[page_num]
                 text += page.extract_text()
+
+        # If extracted text is too short, try OCR
+        if len(text.strip()) < 100:
+            logger.info("Text too short, attempting OCR...")
+            try:
+                # Convert PDF to images and perform OCR
+                images = convert_from_path(pdf_path)
+                ocr_text = ""
+                for i, image in enumerate(images):
+                    ocr_text += pytesseract.image_to_string(image)
+                
+                if len(ocr_text.strip()) > len(text.strip()):
+                    text = ocr_text
+                    logger.info(f"OCR successfully extracted more text: {text}")
+                else:
+                    logger.warning("OCR did not extract more text than regular extraction")
+            except Exception as ocr_error:
+                logger.error(f"OCR failed: {ocr_error}")
+                # Continue with the original text if OCR fails
+
         logger.info(f"Successfully extracted text from PDF: {pdf_path}")
         return text
     except Exception as e:
@@ -191,6 +214,8 @@ async def process_pdf(
 
         # Extract JSON from the response
         response_text = response.text
+        logger.info(f"Received response from Gemini: {response_text}")
+        
         if response_text.startswith("```json"):
             # Remove the markdown code block markers
             json_str = response_text.replace("```json", "").replace("```", "").strip()
