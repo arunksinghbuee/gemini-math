@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-1.1.pdf', open('math/class-12/ncert/ch-1/ex-que-1.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-1.1.pdf', open('math\\class-12\\ncert\\ch-1\\ex-que-1.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -34,6 +34,7 @@ def call_process_pdf_api(attempt):
                     Make sure that solution should not look like AI generated.
                     DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.
                     Generate and populate the best seoMetadata for respective example.
+                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
                     title, solution, explanation, seoMetaData must be created for English (en) and Hindi (hi).
                     Please make sure that response must be in JSON format.
