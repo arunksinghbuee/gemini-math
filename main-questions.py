@@ -71,7 +71,8 @@ Sample json response:
             'board': 'CBSE',
             'source': 'NCERT Maths',
             'chapterNo': '1',
-            'lastQuestionNumber': 16
+            'totalQuestions': 16,
+            'lastQuestionNumber': 0
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
