@@ -11,10 +11,10 @@ import logging
 from typing import Optional
 from dotenv import load_dotenv
 from createQuestion import createQuestion as create_question_api
+import requests
+from formatQuestionJson import format_question_json
 import pytesseract
 from pdf2image import convert_from_path
-from formatQuestionJson import format_question_json
-import PyPDF2
 
 # Configure logging
 logging.basicConfig(
@@ -124,69 +124,41 @@ def update_question_number(board, source, subjectCode, gradeCode, topicCode, cha
         logger.error(f"Error updating question numbers: {e}")
 
 def extract_text_from_pdf(pdf_path: str) -> str:
-    """Extracts text content from a PDF file."""
-    text = ""
+    """Extracts text content from a PDF file using external API."""
     try:
+        # API endpoint
+        url = "http://localhost:5000/read-pdf"
+        
+        # Headers
+        headers = {
+            'x-api-key': os.getenv('PDF_API_KEY', '')  # Get API key from environment variable
+        }
+        
+        # Prepare the file
         with open(pdf_path, 'rb') as pdf_file:
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-            for page_num in range(len(pdf_reader.pages)):
-                page = pdf_reader.pages[page_num]
-                text += page.extract_text()
-        logger.info(f"Successfully extracted text from PDF: {pdf_path}")
-        return text
+            files = {
+                'file': (os.path.basename(pdf_path), pdf_file, 'application/pdf')
+            }
+            
+            # Make the API call
+            response = requests.post(url, headers=headers, files=files)
+            response.raise_for_status()  # Raise exception for bad status codes
+            
+            # Parse the response
+            result = response.json()
+            if result.get('success'):
+                text = result.get('text', '')
+                logger.info(f"Successfully extracted text from PDF: {pdf_path}")
+                return text
+            else:
+                raise Exception("PDF text extraction failed")
+                
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Error calling PDF extraction API: {e}")
     except Exception as e:
-        logger.error(f"Error reading PDF {pdf_path}: {e}")
+        logger.error(f"Error extracting text from PDF {pdf_path}: {e}")
         raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-
-def extract_pdf_text_from_pdf(pdf_path):
-  """
-  Extracts text content from a PDF file.
-
-  Args:
-    pdf_path: The path to the PDF file.
-
-  Returns:
-    A string containing the extracted text, or None if an error occurs.
-  """
-  try:
-    with open(pdf_path, 'rb') as pdf_file:
-      pdf_reader = PyPDF2.PdfReader(pdf_file)
-      text = ""
-      for page_num in range(len(pdf_reader.pages)):
-        page = pdf_reader.pages[page_num]
-        text += page.extract_text()
-      return text
-  except FileNotFoundError as e:
-    logger.error(f"File not found at '{pdf_path}: {e}")
-    raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-
-  except PyPDF2.errors.PdfReadError as e:
-    logger.error(f"Error reading PDF {pdf_path}: {e}")
-    raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-  except Exception as e:
-    logger.error(f"An unexpected error occurred: {e}")
-    raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-
-def extract_ocr_text_from_pdf(pdf_path):
-    try:
-        images = convert_from_path(pdf_path)
-        text = ""
-        for i, image in enumerate(images):
-            text += pytesseract.image_to_string(image)
-        return text
-    except FileNotFoundError as e:
-        logger.error(f"File not found at '{pdf_path}: {e}")
-        raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-    except Exception as e:
-        logger.error(f"Error reading PDF {pdf_path}: {e}")
-        raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
-
-def extract_text_from_pdf(pdf_path):
-  extracted_text = extract_pdf_text_from_pdf(pdf_path)
-  if len(extracted_text) < 100:
-    extracted_text = extract_ocr_text_from_pdf(pdf_path)
-  logger.info(f"Successfully extracted text from PDF: {pdf_path}")    
-  return extracted_text
 
 @app.post("/process_pdf")
 async def process_pdf(

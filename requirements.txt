@@ -6,4 +6,5 @@ python-multipart==0.0.6
 python-dotenv==1.0.0
 redis==5.0.1
 pytesseract==0.3.10
-pdf2image==1.16.3 
+pdf2image==1.16.3
+requests==2.31.0 
