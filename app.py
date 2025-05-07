@@ -15,6 +15,7 @@ import requests
 from formatQuestionJson import format_question_json
 import pytesseract
 from pdf2image import convert_from_path
+import xml.etree.ElementTree as ET
 
 # Configure logging
 logging.basicConfig(
@@ -160,6 +161,45 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         logger.error(f"Error extracting text from PDF {pdf_path}: {e}")
         raise HTTPException(status_code=400, detail=f"Error reading PDF: {e}")
 
+def extract_fields_from_xml(xml_text):
+    """Extract fields from XML response and return a dictionary."""
+    try:
+        # Remove markdown code block markers if present
+        if xml_text.startswith("```xml"):
+            xml_text = xml_text.replace("```xml", "").replace("```", "").strip()
+        
+        # Parse XML string
+        root = ET.fromstring(xml_text)
+        
+        # Find the question element
+        question = root.find('.//question')
+        if question is None:
+            raise ValueError("No question element found in XML")
+            
+        # Extract fields
+        result = {
+            "title": {
+                "en": question.findtext('.//title/en', '').strip()
+            },
+            "solution": {
+                "en": question.findtext('.//solution/en', '').strip()
+            },
+            "explanation": {
+                "en": question.findtext('.//explanation/en', '').strip()
+            },
+            "difficultyLevelCode": question.findtext('.//difficultyLevelCode', '').strip(),
+            "questionNo": question.findtext('.//questionNo', '').strip()
+        }
+        
+        logger.info("Successfully extracted fields from XML")
+        return result
+    except ET.ParseError as e:
+        logger.error(f"XML parsing error: {e}")
+        raise ValueError(f"Invalid XML format: {e}")
+    except Exception as e:
+        logger.error(f"Error extracting fields from XML: {e}")
+        raise
+
 @app.post("/process_pdf")
 async def process_pdf(
     pdf_file: UploadFile = File(...),
@@ -216,107 +256,45 @@ async def process_pdf(
         os.remove(file_path)
         logger.info(f"Removed temporary file: {file_path}")
 
-        # Extract JSON from the response
+        # Extract fields from XML response
         response_text = response.text
         logger.info(f"Received response from Gemini: {response_text}")
-        if response_text.startswith("```json"):
-            # Remove the markdown code block markers
-            json_str = response_text.replace("```json", "").replace("```", "").strip()
+        
+        try:
+            json_data = extract_fields_from_xml(response_text)
+            logger.info("Successfully parsed XML response")
             
-            # Clean the JSON string
-            # Remove control characters except newlines and tabs
-            json_str = ''.join(char for char in json_str if ord(char) >= 32 or char in '\n\r\t')
+            # Format the question JSON
+            next_sequence_number = get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
+            formatted_json = format_question_json(
+                json_data,
+                status=status,
+                gradeCode=gradeCode,
+                subjectCode=subjectCode,
+                topicCode=topicCode,
+                postedByUserId=postedByUserId,
+                board=board,
+                source=source,
+                chapterNo=chapterNo,
+                seqNumber=next_sequence_number
+            )
             
-            # Fix any malformed JSON by replacing problematic characters
-            json_str = json_str.replace('\\n', '\\\\n')  # Escape newlines
-            json_str = json_str.replace('\\"', '"')      # Fix escaped quotes
-            json_str = json_str.replace('\\t', '\\\\t')  # Escape tabs
-            
-            # Remove any extra whitespace between words
-            json_str = ' '.join(json_str.split())
-            
+            # Create question using API
             try:
-                # Parse the JSON string
-                json_data = json.loads(json_str)
-                logger.info("Successfully parsed JSON response")
-                
-                # Handle both single object and array cases
-                if isinstance(json_data, dict):
-                    logger.info("Processing single question")
-                    next_sequence_number = get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
-                    try:
-                        formatted_json = format_question_json(
-                            json_data,
-                            status=status,
-                            gradeCode=gradeCode,
-                            subjectCode=subjectCode,
-                            topicCode=topicCode,
-                            postedByUserId=postedByUserId,
-                            board=board,
-                            source=source,
-                            chapterNo=chapterNo,
-                            seqNumber=next_sequence_number                            
-                        )
-                        # Create question using API
-                        try:
-                            api_response = create_question_api(formatted_json)
-                            update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_sequence_number)
-                            logger.info(f"Question created successfully: {api_response}")
-                            update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_question_number)                        
-                            # if api_response contains "Example 26" or "Consider a function" then throw an error                           
-                        except Exception as e:
-                            logger.error(f"Error creating question via API: {e}")
-                            raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
-                    except Exception as e:
-                        logger.error(f"Error formatting question: {e}")
-                        raise
-                elif isinstance(json_data, list):
-                    logger.info(f"Processing {len(json_data)} questions")
-                    formatted_questions = []
-                    for question in json_data:
-                        try:
-                            next_sequence_number = get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
-                            formatted_question = format_question_json(
-                                question,
-                                status=status,
-                                gradeCode=gradeCode,
-                                subjectCode=subjectCode,
-                                topicCode=topicCode,
-                                postedByUserId=postedByUserId,
-                                board=board,
-                                source=source,
-                                chapterNo=chapterNo,
-                                seqNumber=next_sequence_number
-                            )
-                            # Create question using API
-                            try:
-                                api_response = create_question_api(formatted_question)
-                                update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_sequence_number)
-                                update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_question_number)
-                                next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
-                                logger.info(f"Question created successfully: {api_response}")
-                                formatted_questions.append(formatted_question)
-                                if lastQuestionNumber < next_question_number:
-                                    break
-                            except Exception as e:
-                                logger.error(f"Error creating question via API: {e}")
-                                raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
-                        except Exception as e:
-                            logger.error(f"Error formatting question: {e}")
-                            raise
-                    return formatted_questions
-                else:
-                    logger.error("Invalid JSON structure received")
-                    raise HTTPException(status_code=500, detail="Invalid JSON structure")
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON parsing error: {e}")
-                raise HTTPException(status_code=500, detail=f"Error parsing JSON response: {e}")
+                api_response = create_question_api(formatted_json)
+                update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_sequence_number)
+                logger.info(f"Question created successfully: {api_response}")
+                update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, next_question_number)
+                return formatted_json
             except Exception as e:
-                logger.error(f"Error processing questions: {e}")
-                raise HTTPException(status_code=500, detail=f"Error processing questions: {e}")
-        else:
-            logger.warning("Received non-JSON response from Gemini")
-            return {"response": response_text}
+                logger.error(f"Error creating question via API: {e}")
+                raise HTTPException(status_code=500, detail=f"Error creating question: {e}")
+        except ValueError as e:
+            logger.error(f"Error processing XML response: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+        except Exception as e:
+            logger.error(f"Error processing request: {e}")
+            raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
     except Exception as e:
         logger.error(f"Error processing request: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")

@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-1.1.pdf', open('math\\class-12\\ncert\\ch-1\\ex-que-1.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-1.1.pdf', open('math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -36,39 +36,34 @@ def call_process_pdf_api(attempt):
                     Generate and populate the best seoMetadata for respective example.
                     Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
-                    title, solution, explanation, seoMetaData must be created for English (en)
-                    Please make sure that response must be in JSON format.
+                    title, solution, explanation must be created for English (en)
+                    Please make sure that response must be in XML format.
                     Do not provide 'Explanation of the Code and Choices' in the response.
                     Do not provide 'Important Considerations' in the response.
                     
-                    Create response in the following json format.
+                    Create response in the following XML format.
 
-Sample json response:
-{
-"title": {
-"en": <question here> }
-"solution": {
-"en": <solution here>
-},
-"explanation": {
-"en": <explanation here>
-},
-"difficultyLevelCode": <difficulty level>,
-"seoMetaData": {
-"en": <best possible seo MetaData as per title, solution and explanation in en language>,
-},
-"questionNo": Que <quesitonNo>
-}""",
-            'status': 'PUBLISHED',
-            'gradeCode': 'GRADE_12',
-            'subjectCode': 'MATH',
-            'topicCode': 'REL_AND_FUNC',
-            'postedByUserId': '67fabb8bf481c327cbb04d46',
-            'board': 'CBSE',
-            'source': 'NCERT Maths',
-            'chapterNo': '1',
-            'lastQuestionNumber': 16
-        }
+                    Sample xml response:
+                    <questions>
+                        <question>
+                            <title> <en>title here</en> </title>
+                            <solution><en>solution here</en> </solution>                        
+                            <explanation><en>explanation here</en> </explanation>
+                            <difficultyLevelCode>difficulty level</difficultyLevelCode>
+                            <questionNo>quesitonNo</questionNo>
+                        </question>
+                    </questions>
+                """,
+                    'status': 'PUBLISHED',
+                    'gradeCode': 'GRADE_12',
+                    'subjectCode': 'MATH',
+                    'topicCode': 'REL_AND_FUNC',
+                    'postedByUserId': '67fabb8bf481c327cbb04d46',
+                    'board': 'CBSE',
+                    'source': 'NCERT Maths',
+                    'chapterNo': '1',
+                    'lastQuestionNumber': 16
+}
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
         response = requests.post(url, files=files, data=data)
