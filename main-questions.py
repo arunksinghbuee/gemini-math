@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-1.1.pdf', open('math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-1.1.pdf', open('math\\class-12\\ncert\\ch-1\\ex-que-1.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -37,7 +37,7 @@ def call_process_pdf_api(attempt):
                     Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
                     title, solution, explanation, seoMetaData must be created for English (en)
-                    Please make sure that response must be in JSON format. Partial json response is not acceptable.
+                    Please make sure that response must be in JSON format.
                     Do not provide 'Explanation of the Code and Choices' in the response.
                     Do not provide 'Important Considerations' in the response.
                     
