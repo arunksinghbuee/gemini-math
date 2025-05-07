@@ -222,6 +222,7 @@ async def process_pdf(
 
         # Extract JSON from the response
         response_text = response.text
+        logger.info(f"Received response from Gemini: {response_text}")
         if response_text.startswith("```json"):
             # Remove the markdown code block markers
             json_str = response_text.replace("```json", "").replace("```", "").strip()

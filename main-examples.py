@@ -35,26 +35,22 @@ def call_process_pdf_api(attempt):
                     Generate and populate the best seoMetadata for respective example.
                     Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
-                    title, solution, explanation, seoMetaData must be created for English (en) and Hindi (hi).
+                    title, solution, explanation, seoMetaData must be created for English (en)
                     Response must be json only. Create response in the following format.
 
 Sample json response:
 {
 "title": {
-"en": <question here> },
-"hi": <respective hindi translation>,
+"en": <question here> }
 "solution": {
-"en": <solution here>,
-"hi": <respective hindi translation>,
+"en": <solution here>
 },
 "explanation": {
-"en": <explanation here>,
-"hi": <respective hindi translation>,
+"en": <explanation here>
 },
 "difficultyLevelCode": <difficulty level>,
 "seoMetaData": {
-"en": <best possible seo MetaData as per title, solution and explanation in en language>,
-"hi": <best possible seo MetaData as per title, solution and explanation in hi language>,
+"en": <best possible seo MetaData as per title, solution and explanation in en language>
 },
 "questionNo": Example <quesitonNo>
 }""",
