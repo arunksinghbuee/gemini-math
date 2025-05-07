@@ -172,8 +172,7 @@ async def process_pdf(
     board: str = Form(...),
     source: str = Form(...),
     chapterNo: str = Form(...),
-    totalQuestions: int = Form(...), # Total questions/examples in the pdf
-    lastQuestionNumber: int = Form(...), # Last question number fetch yet 
+    lastQuestionNumber: int = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
     logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
@@ -195,17 +194,14 @@ async def process_pdf(
         except Exception as e:
             logger.error(f"Error extracting text from PDF: {e}")
             raise HTTPException(status_code=500, detail=f"Error extracting text from PDF: {e}")
-        
-        if lastQuestionNumber > 0:
-            update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, lastQuestionNumber)
-        
+
         next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
         # Construct the final prompt for Gemini
         final_prompt = f"""Based on the content of the following PDF:\n\n{pdf_text}
                          Pick up questions from question no {next_question_number}
                          \n\n{prompt}
                         """
-        if totalQuestions < next_question_number:
+        if lastQuestionNumber < next_question_number:
             raise HTTPException(status_code=500, detail="No new questions found")
 
         logger.info("Generated final prompt for Gemini")
@@ -300,7 +296,7 @@ async def process_pdf(
                                 next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
                                 logger.info(f"Question created successfully: {api_response}")
                                 formatted_questions.append(formatted_question)
-                                if totalQuestions < next_question_number:
+                                if lastQuestionNumber < next_question_number:
                                     break
                             except Exception as e:
                                 logger.error(f"Error creating question via API: {e}")
