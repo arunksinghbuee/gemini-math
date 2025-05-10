@@ -25,40 +25,40 @@ def call_process_pdf_api(attempt):
         }
         
         data = {
-            'prompt': """You are a mathematics teacher of class 12.
+            'prompt': """You are a professional mathematics teacher of class 12.
                     Read all the examples and its solutions from attached PDF file.
                     Title and solution in en language must be exacted same as in PDF file.
                     Example has its solution just after the example. Use that solution rather than creating your own solution.
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
                     DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.
-                    Generate and populate the best seoMetadata for respective example.
-                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
-                    Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
-                    title, solution, explanation, seoMetaData must be created for English (en)
-                    Response must be json only. Create response in the following format.
+                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using $...$
+                    Don't use latex in englishTitle and solutionWOLatex. englishTitle and solutionWOLatex should be in plain text.
+                    englishTitle should be picked from title.
+                    Do not provide 'Explanation of the Code and Choices' in the response.
+                    Do not provide 'Important Considerations' in the response.
+                    Don't use markup in title, solution and explanation.
+                    Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation.
+                    title, solution, explanation must be created for English (en) language only.
+                    Read and reply only one question at a time.
+                    Response must be XML only. Create response in the following format.
 
-Sample json response:
-{
-"title": {
-"en": <question here> }
-"solution": {
-"en": <solution here>
-},
-"explanation": {
-"en": <explanation here>
-},
-"difficultyLevelCode": <difficulty level>,
-"seoMetaData": {
-"en": <best possible seo MetaData as per title, solution and explanation in en language>
-},
-"questionNo": Example <quesitonNo>
-}""",
-            'status': 'PUBLISHED',
+Sample xml response:
+    <question>
+        <title> <en> <question here> </en> </title>
+        <englishTitle> <en> <question here> </en> </englishTitle>
+        <solution> <en> <solution here> </en> </solution>
+        <solutionWOLatex> <en> <solution here> </en> </solutionWOLatex>
+        <explanation> <en> <explanation here> </en> </explanation>
+        <difficultyLevelCode> <difficulty level> </difficultyLevelCode>
+        <questionNo> Example <quesitonNo> </questionNo>
+    </question>
+""",
+            'status': 'DRAFT',
             'gradeCode': 'GRADE_12',
             'subjectCode': 'MATH',
             'topicCode': 'REL_AND_FUNC',
-            'postedByUserId': '67fabb8bf481c327cbb04d46',
+            'postedByUserId': '6810b82fb49f7e3b1f0460ea',
             'board': 'CBSE',
             'source': 'NCERT Maths',
             'chapterNo': '1',

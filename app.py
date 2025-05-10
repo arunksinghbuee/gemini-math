@@ -181,11 +181,17 @@ def extract_fields_from_xml(xml_text):
             "title": {
                 "en": question.findtext('.//title/en', '').strip()
             },
+            "englishTitle": {
+                "en": question.findtext('.//englishTitle/en', '').strip()
+            },
             "solution": {
                 "en": question.findtext('.//solution/en', '').strip()
             },
             "explanation": {
                 "en": question.findtext('.//explanation/en', '').strip()
+            },
+            "solutionWOLatex": {
+                "en": question.findtext('.//solutionWOLatex/en', '').strip()
             },
             "difficultyLevelCode": question.findtext('.//difficultyLevelCode', '').strip(),
             "questionNo": question.findtext('.//questionNo', '').strip()
@@ -316,11 +322,7 @@ def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, p
             "board": board,
             "source": source,
             "chapterNo": chapterNo,
-            "seqNumber": seqNumber,
-            "seoMetaData": {
-                "en": json_data.get("seoMetaData", {}).get("en", ""),
-                "hi": json_data.get("seoMetaData", {}).get("hi", "")
-            }
+            "seqNumber": seqNumber
         })
         
         return json_data

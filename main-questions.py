@@ -25,7 +25,7 @@ def call_process_pdf_api(attempt):
         }
         
         data = {
-            'prompt': """You are a mathematics teacher of class 12.
+            'prompt': """You are a professional mathematics teacher of class 12.
                     You need to solve questions provied in the exercise 1.1.
 
                     Title in en language must be exact same as question in PDF file.
@@ -33,32 +33,33 @@ def call_process_pdf_api(attempt):
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
                     DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.
-                    Generate and populate the best seoMetadata for respective example.
-                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using \(...\)
-                    Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markdown in title, solution and explanation.
-                    title, solution, explanation must be created for English (en)
+                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using $...$
+                    Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation. Don't use markup in title, solution and explanation.
+                    title, solution, explanation must be created for English (en) language only.
+                    englishTitle should be same as title.
+                    Don't use latex in englishTitle and solutionWOLatex. englishTitle and solutionWOLatex should be in plain text.
                     Please make sure that response must be in XML format.
                     Do not provide 'Explanation of the Code and Choices' in the response.
                     Do not provide 'Important Considerations' in the response.
-                    
+                    Provide only one question in the response.
                     Create response in the following XML format.
 
                     Sample xml response:
-                    <questions>
                         <question>
-                            <title> <en>title here</en> </title>
-                            <solution><en>solution here</en> </solution>                        
-                            <explanation><en>explanation here</en> </explanation>
-                            <difficultyLevelCode>difficulty level</difficultyLevelCode>
-                            <questionNo>quesitonNo</questionNo>
+                            <title> <en> <question here> </en> </title>
+                            <englishTitle> <en> <question here> </en> </englishTitle>
+                            <solution> <en> <solution here> </en> </solution>
+                            <solutionWOLatex> <en> <solution here> </en> </solutionWOLatex>
+                            <explanation> <en> <explanation here> </en> </explanation>
+                            <difficultyLevelCode> <difficulty level> </difficultyLevelCode>
+                            <questionNo> Example <quesitonNo> </questionNo>
                         </question>
-                    </questions>
                 """,
                     'status': 'PUBLISHED',
                     'gradeCode': 'GRADE_12',
                     'subjectCode': 'MATH',
                     'topicCode': 'REL_AND_FUNC',
-                    'postedByUserId': '67fabb8bf481c327cbb04d46',
+                    'postedByUserId': '6810b82fb49f7e3b1f0460ea',
                     'board': 'CBSE',
                     'source': 'NCERT Maths',
                     'chapterNo': '1',
