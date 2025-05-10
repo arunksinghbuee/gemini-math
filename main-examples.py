@@ -45,13 +45,13 @@ def call_process_pdf_api(attempt):
 
 Sample xml response:
     <question>
-        <title> <en> <question here> </en> </title>
-        <englishTitle> <en> <question here> </en> </englishTitle>
-        <solution> <en> <solution here> </en> </solution>
-        <solutionWOLatex> <en> <solution here> </en> </solutionWOLatex>
-        <explanation> <en> <explanation here> </en> </explanation>
-        <difficultyLevelCode> <difficulty level> </difficultyLevelCode>
-        <questionNo> Example <quesitonNo> </questionNo>
+        <title> <en> <question here></en> </title>
+        <englishTitle> <en><question here></en> </englishTitle>
+        <solution> <en><solution here></en> </solution>
+        <solutionWOLatex> <en><solution here></en> </solutionWOLatex>
+        <explanation> <en><explanation here></en> </explanation>
+        <difficultyLevelCode><difficulty level></difficultyLevelCode>
+        <questionNo>Example <quesitonNo></questionNo>
     </question>
 """,
             'status': 'DRAFT',

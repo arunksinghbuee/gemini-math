@@ -46,16 +46,16 @@ def call_process_pdf_api(attempt):
 
                     Sample xml response:
                         <question>
-                            <title> <en> <question here> </en> </title>
-                            <englishTitle> <en> <question here> </en> </englishTitle>
-                            <solution> <en> <solution here> </en> </solution>
-                            <solutionWOLatex> <en> <solution here> </en> </solutionWOLatex>
-                            <explanation> <en> <explanation here> </en> </explanation>
-                            <difficultyLevelCode> <difficulty level> </difficultyLevelCode>
-                            <questionNo> Example <quesitonNo> </questionNo>
+                            <title> <en><question here></en> </title>
+                            <englishTitle> <en><question here></en> </englishTitle>
+                            <solution> <en><solution here></en> </solution>
+                            <solutionWOLatex><en><solution here></en> </solutionWOLatex>
+                            <explanation> <en><explanation here></en> </explanation>
+                            <difficultyLevelCode><difficulty level></difficultyLevelCode>
+                            <questionNo>Que <quesitonNo></questionNo>
                         </question>
                 """,
-                    'status': 'PUBLISHED',
+                    'status': 'DRAFT',
                     'gradeCode': 'GRADE_12',
                     'subjectCode': 'MATH',
                     'topicCode': 'REL_AND_FUNC',
