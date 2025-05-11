@@ -26,7 +26,7 @@ def call_process_pdf_api(attempt):
         
         data = {
             'prompt': """You are a professional mathematics teacher of class 12.
-                    Read all the examples and its solutions from attached PDF file.
+                    Read example and its solution from attached PDF file.
                     Title and solution in en language must be exacted same as in PDF file.
                     Example has its solution just after the example. Use that solution rather than creating your own solution.
                     Write explanation of the solution.
@@ -37,10 +37,11 @@ def call_process_pdf_api(attempt):
                     Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using $...$
                     Do not provide 'Explanation of the Code and Choices' in the response.
                     Do not provide 'Important Considerations' in the response.
-                    Don't use markup in title, solution and explanation.
+                    Don't use markup symbols in title, solution and explanation.
                     Add next line, double next line, paragraph etc whatever and wherever best applicable for the student in title, solution and explanation.
                     title, solution, explanation must be created for English (en) language only.
-                    Read and reply only one question at a time.
+                    Read and respond only one example at a time.
+                    Only examples should be read and responded. For example, Example 1, Example 2, Example 3, etc.
                     Response must be XML only. Create response in the following format.
 
 Sample xml response:
@@ -51,10 +52,10 @@ Sample xml response:
         <solutionWOLatex> <en><![CDATA[solution here]]></en> </solutionWOLatex>
         <explanation> <en><![CDATA[explanation here]]></en> </explanation>
         <difficultyLevelCode><difficulty level></difficultyLevelCode>
-        <questionNo>Example <quesitonNo></questionNo>
+        <questionNo>Example <exampleNo></questionNo>
     </question>
 """,
-            'status': 'DRAFT',
+            'status': 'PUBLISHED',
             'gradeCode': 'GRADE_12',
             'subjectCode': 'MATH',
             'topicCode': 'REL_AND_FUNC',

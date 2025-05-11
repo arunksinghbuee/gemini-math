@@ -257,9 +257,9 @@ async def process_pdf(
 
         next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
         # Construct the final prompt for Gemini
-        final_prompt = f"""Based on the content of the following PDF:\n\n{pdf_text}
-                         Pick up questions from question no {next_question_number}
-                         \n\n{prompt}
+        final_prompt = f"""{prompt}\n\n
+                        Based on the content of the following PDF:\n\n{pdf_text}
+                         Pick up example {next_question_number}
                         """
         if lastQuestionNumber < next_question_number:
             raise HTTPException(status_code=500, detail="No new questions found")
