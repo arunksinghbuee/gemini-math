@@ -2,11 +2,8 @@
 .venv/
 *.log
 create_question.log
-question_numbers.json
-sequence_numbers.json
 __pycache_/*
 __pycache__/formatQuestionJson.cpython-311.pyc
-previousQuestionId.txt
 tmp.json
 working.json
 working1.json
