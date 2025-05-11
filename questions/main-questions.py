@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-1.1.pdf', open('math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-1.1.pdf', open('..\\math\\class-12\\ncert\\ch-1\\ncert-math-exercise-1.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -45,17 +45,17 @@ def call_process_pdf_api(attempt):
                     Create response in the following XML format.
 
                     Sample xml response:
-                        <question>
-                            <title> <en><question here></en> </title>
-                            <englishTitle> <en><question here></en> </englishTitle>
-                            <solution> <en><solution here></en> </solution>
-                            <solutionWOLatex><en><solution here></en> </solutionWOLatex>
-                            <explanation> <en><explanation here></en> </explanation>
-                            <difficultyLevelCode><difficulty level></difficultyLevelCode>
-                            <questionNo>Que <quesitonNo></questionNo>
-                        </question>
+                    <question>
+                        <title> <en><![CDATA[question here]]></en> </title>
+                        <englishTitle><![CDATA[question here]]></englishTitle>
+                        <solution> <en><![CDATA[solution here]]></en> </solution>
+                        <solutionWOLatex> <en><![CDATA[solution here]]></en> </solutionWOLatex>
+                        <explanation> <en><![CDATA[explanation here]]></en> </explanation>
+                        <difficultyLevelCode><difficulty level></difficultyLevelCode>
+                        <questionNo>Example <exampleNo></questionNo>
+                    </question>
                 """,
-                    'status': 'DRAFT',
+                    'status': 'PUBLISHED',
                     'gradeCode': 'GRADE_12',
                     'subjectCode': 'MATH',
                     'topicCode': 'REL_AND_FUNC',
@@ -63,7 +63,8 @@ def call_process_pdf_api(attempt):
                     'board': 'CBSE',
                     'source': 'NCERT Maths',
                     'chapterNo': '1',
-                    'lastQuestionNumber': 16
+                    'lastQuestionNumber': 16,
+                    'exerciseNo': '1.1'
 }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")

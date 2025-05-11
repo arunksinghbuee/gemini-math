@@ -12,9 +12,6 @@ from typing import Optional
 from dotenv import load_dotenv
 from createQuestion import createQuestion as create_question_api
 import requests
-from formatQuestionJson import format_question_json
-import pytesseract
-from pdf2image import convert_from_path
 import xml.etree.ElementTree as ET
 
 # Configure logging
@@ -93,7 +90,26 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
             with open(filename, 'r') as f:
                 question_numbers = json.load(f)
             logger.info(f"Loaded question numbers from {filename}")
-            return question_numbers.get(key, 1) + 1
+            # read example-numbers.txt file. It contains all example numbers in new line. Get next example number after question_numbers.get(key, 1)
+            current_number = question_numbers.get(key, 1)
+            
+            try:
+                with open("example-numbers.txt", "r") as f:
+                    example_numbers = [line.strip() for line in f if line.strip()]
+                
+                if current_number == 0:
+                    return example_numbers[0]
+                
+                # Find the next number after current_number
+                i=0
+                for num in example_numbers:
+                    if num == str(current_number):
+                        return example_numbers[i+1]
+                    i+=1                    
+                return str(current_number + 1)
+            except Exception as e:
+                logger.error(f"Error reading example numbers: {e}")
+                return str(current_number + 1)
         else:
             logger.info(f"Question numbers file not found, returning default value 1")
             return 1
@@ -128,7 +144,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text content from a PDF file using external API."""
     try:
         # API endpoint
-        url = "http://3.109.56.23:5000/read-pdf"
+        url = "http://3.109.211.113:5000/read-pdf"
         
         # Headers
         headers = {
@@ -232,6 +248,7 @@ async def process_pdf(
     board: str = Form(...),
     source: str = Form(...),
     chapterNo: str = Form(...),
+    exerciseNo: str = Form(...),
     lastQuestionNumber: int = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
@@ -259,10 +276,10 @@ async def process_pdf(
         # Construct the final prompt for Gemini
         final_prompt = f"""{prompt}\n\n
                         Based on the content of the following PDF:\n\n{pdf_text}
-                         Pick up example {next_question_number}
+                         Pick up question number {next_question_number}
                         """
-        if lastQuestionNumber < next_question_number:
-            raise HTTPException(status_code=500, detail="No new questions found")
+        #if lastQuestionNumber < next_question_number:
+        #    raise HTTPException(status_code=500, detail="No new questions found")
 
         logger.info("Generated final prompt for Gemini")
 
@@ -296,7 +313,8 @@ async def process_pdf(
                 board=board,
                 source=source,
                 chapterNo=chapterNo,
-                seqNumber=next_sequence_number
+                seqNumber=next_sequence_number,
+                exerciseNo=exerciseNo
             )
             
             # Create question using API
@@ -319,7 +337,7 @@ async def process_pdf(
         logger.error(f"Error processing request: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
 
-def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, postedByUserId, board, source, chapterNo, seqNumber):
+def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, postedByUserId, board, source, chapterNo, seqNumber, exerciseNo):
     """Format the question JSON with additional metadata."""
     try:
         # Ensure json_data is a dictionary
@@ -336,7 +354,8 @@ def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, p
             "board": board,
             "source": source,
             "chapterNo": chapterNo,
-            "seqNumber": seqNumber
+            "seqNumber": seqNumber,
+            "exerciseNo": exerciseNo
         })
         
         return json_data
