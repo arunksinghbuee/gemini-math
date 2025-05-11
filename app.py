@@ -128,7 +128,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text content from a PDF file using external API."""
     try:
         # API endpoint
-        url = "http://localhost:5000/read-pdf"
+        url = "http://3.109.56.23:5000/read-pdf"
         
         # Headers
         headers = {
@@ -168,37 +168,51 @@ def extract_fields_from_xml(xml_text):
         if xml_text.startswith("```xml"):
             xml_text = xml_text.replace("```xml", "").replace("```", "").strip()
         
+        logger.info(f"Processing XML text: {xml_text[:200]}...")  # Log first 200 chars
+        
         # Parse XML string
         root = ET.fromstring(xml_text)
         
-        # Find the question element
-        question = root.find('.//question')
+        # If root is the question element, use it directly
+        question = root if root.tag == 'question' else root.find('question')
         if question is None:
+            logger.error(f"XML structure: {ET.tostring(root, encoding='unicode')[:200]}...")  # Log XML structure
             raise ValueError("No question element found in XML")
-            
-        # Extract fields
-        result = {
-            "title": {
-                "en": question.findtext('.//title/en', '').strip()
-            },
-            "englishTitle": {
-                "en": question.findtext('.//englishTitle/en', '').strip()
-            },
-            "solution": {
-                "en": question.findtext('.//solution/en', '').strip()
-            },
-            "explanation": {
-                "en": question.findtext('.//explanation/en', '').strip()
-            },
-            "solutionWOLatex": {
-                "en": question.findtext('.//solutionWOLatex/en', '').strip()
-            },
-            "difficultyLevelCode": question.findtext('.//difficultyLevelCode', '').strip(),
-            "questionNo": question.findtext('.//questionNo', '').strip()
-        }
         
-        logger.info("Successfully extracted fields from XML")
-        return result
+        # Extract fields with more detailed error handling
+        try:
+            title_en = question.findtext('.//title/en', '').strip()
+            english_title_en = question.findtext('.//englishTitle', '').strip()
+            solution_en = question.findtext('.//solution/en', '').strip()
+            explanation_en = question.findtext('.//explanation/en', '').strip()
+            solution_wo_latex_en = question.findtext('.//solutionWOLatex/en', '').strip()
+            difficulty_level = question.findtext('.//difficultyLevelCode', '').strip()
+            question_no = question.findtext('.//questionNo', '').strip()
+            
+            result = {
+                "title": {"en": title_en},
+                "englishTitle": english_title_en,
+                "solution": {"en": solution_en},
+                "explanation": {"en": explanation_en},
+                "solutionWOLatex": {"en": solution_wo_latex_en},
+                "difficultyLevelCode": difficulty_level,
+                "questionNo": question_no
+            }
+            
+            # Log the extracted fields (first 100 chars of each)
+            logger.info("Extracted fields:")
+            for key, value in result.items():
+                if isinstance(value, dict):
+                    logger.info(f"{key}: {str(value)[:100]}...")
+                else:
+                    logger.info(f"{key}: {str(value)[:100]}...")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error extracting specific fields: {e}")
+            raise ValueError(f"Error extracting fields from XML: {e}")
+            
     except ET.ParseError as e:
         logger.error(f"XML parsing error: {e}")
         raise ValueError(f"Invalid XML format: {e}")

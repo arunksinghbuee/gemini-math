@@ -90,6 +90,7 @@ def createQuestion(formatted_json):
             formatted_json['previousQuestionId'] = previous_question_id
         
         logger.info("Attempting to create question...")
+        print(f"Formatted JSON: {formatted_json}")
         question_response = requests.post(question_url, headers=question_headers, json=formatted_json)
         question_response.raise_for_status()
         response_data = question_response.json()

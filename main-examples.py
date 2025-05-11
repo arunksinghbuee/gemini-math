@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ncert-math-ch-1.pdf', open('math/class-12/ncert/ncert-math-ch-1-relations-functions.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ncert-math-ch-1.pdf', open('math\\class-12\\ncert\\ch-1\\ncert-math-ch-1-relations-functions.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -31,10 +31,10 @@ def call_process_pdf_api(attempt):
                     Example has its solution just after the example. Use that solution rather than creating your own solution.
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
-                    DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.
-                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using $...$
+                    DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.                    
                     Don't use latex in englishTitle and solutionWOLatex. englishTitle and solutionWOLatex should be in plain text.
                     englishTitle should be picked from title.
+                    Must use latex in title, solution and explanation. Use LaTeX format Inline math expressions using $...$
                     Do not provide 'Explanation of the Code and Choices' in the response.
                     Do not provide 'Important Considerations' in the response.
                     Don't use markup in title, solution and explanation.
@@ -46,7 +46,7 @@ def call_process_pdf_api(attempt):
 Sample xml response:
     <question>
         <title> <en> <question here></en> </title>
-        <englishTitle> <en><question here></en> </englishTitle>
+        <englishTitle><question here></englishTitle>
         <solution> <en><solution here></en> </solution>
         <solutionWOLatex> <en><solution here></en> </solutionWOLatex>
         <explanation> <en><explanation here></en> </explanation>
