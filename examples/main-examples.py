@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ncert-math-ch-1.pdf', open('..\\math\\class-12\\ncert\\ch-1\\ncert-math-ch-1-relations-functions.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ncert-math-ch-1.pdf', open('../math/class-12/ncert/ch-1/ncert-math-ch-1-relations-functions.pdf', 'rb'), 'application/pdf')
         }
         
         data = {

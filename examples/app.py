@@ -97,7 +97,7 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
                 with open("example-numbers.txt", "r") as f:
                     example_numbers = [line.strip() for line in f if line.strip()]
                 
-                if current_number == 0:
+                if str(current_number) == "0":
                     return example_numbers[0]
                 
                 # Find the next number after current_number
@@ -106,10 +106,10 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
                     if num == str(current_number):
                         return example_numbers[i+1]
                     i+=1                    
-                return str(current_number + 1)
+                return str(int(current_number) + 1)
             except Exception as e:
                 logger.error(f"Error reading example numbers: {e}")
-                return str(current_number + 1)
+                return str(int(current_number) + 1)
         else:
             logger.info(f"Question numbers file not found, returning default value 1")
             return 1
@@ -144,7 +144,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text content from a PDF file using external API."""
     try:
         # API endpoint
-        url = "http://3.109.211.113:5000/read-pdf"
+        url = "http://localhost:5000/read-pdf"
         
         # Headers
         headers = {
