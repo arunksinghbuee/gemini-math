@@ -89,15 +89,12 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 question_numbers = json.load(f)
-            logger.info(f"Loaded question numbers from {filename}")
             # read example-numbers.txt file. It contains all example numbers in new line. Get next example number after question_numbers.get(key, 1)
             current_number = question_numbers.get(key, 1)
-            
             try:
                 with open("example-numbers.txt", "r") as f:
                     example_numbers = [line.strip() for line in f if line.strip()]
-                
-                if current_number == 0:
+                if str(current_number) == "0":
                     return example_numbers[0]
                 
                 # Find the next number after current_number
@@ -106,10 +103,10 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
                     if num == str(current_number):
                         return example_numbers[i+1]
                     i+=1                    
-                return str(current_number + 1)
+                return str(int(current_number) + 1)
             except Exception as e:
                 logger.error(f"Error reading example numbers: {e}")
-                return str(current_number + 1)
+                return str(int(current_number) + 1)
         else:
             logger.info(f"Question numbers file not found, returning default value 1")
             return 1
