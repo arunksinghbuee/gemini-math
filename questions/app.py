@@ -144,7 +144,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     """Extracts text content from a PDF file using external API."""
     try:
         # API endpoint
-        url = "http://3.109.211.113:5000/read-pdf"
+        url = "http://localhost:5000/read-pdf"
         
         # Headers
         headers = {
