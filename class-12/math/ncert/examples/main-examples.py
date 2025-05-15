@@ -21,7 +21,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ncert-math-ch-1.pdf', open('../math/class-12/ncert/ch-1/ncert-math-ch-1-relations-functions.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('lemh102-examples.pdf', open('../book/ch-2/lemh102-examples.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -58,12 +58,12 @@ Sample xml response:
             'status': 'PUBLISHED',
             'gradeCode': 'GRADE_12',
             'subjectCode': 'MATH',
-            'topicCode': 'REL_AND_FUNC',
+            'topicCode': 'INV_TRIG_FUNC',
             'postedByUserId': '6810b82fb49f7e3b1f0460ea',
             'board': 'CBSE',
             'source': 'NCERT Maths',
-            'chapterNo': '1',
-            'lastQuestionNumber': 26
+            'chapterNo': '2',
+            'lastQuestionNumber': 6
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
