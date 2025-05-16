@@ -41,7 +41,7 @@ app = FastAPI()
 
 def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
     """Get current sequence number from local file."""
-    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{str(chapterNo)}"
+    key = f"sequence"
     filename = "sequence_numbers.json"
     
     try:
@@ -59,7 +59,7 @@ def get_next_sequence_number(board, source, subjectCode, gradeCode, topicCode, c
 
 def update_sequence_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, sequence_number):
     """Update sequence number in local file."""
-    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{str(chapterNo)}"
+    key = f"sequence"
     filename = "sequence_numbers.json"
     
     try:
@@ -82,7 +82,7 @@ def update_sequence_number(board, source, subjectCode, gradeCode, topicCode, cha
 
 def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo):
     """Get next question number from local file."""
-    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{str(chapterNo)}_question"
+    key = f"question"
     filename = "question_numbers.json"
     
     try:
@@ -115,7 +115,7 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
 
 def update_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo, question_number):
     """Update question number in local file."""
-    key = f"{board}_{source}_{subjectCode}_{gradeCode}_{topicCode}_{str(chapterNo)}_question"
+    key = f"question"
     filename = "question_numbers.json"
     
     try:
