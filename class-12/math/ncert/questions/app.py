@@ -89,7 +89,6 @@ def get_next_question_number(board, source, subjectCode, gradeCode, topicCode, c
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 question_numbers = json.load(f)
-            # read example-numbers.txt file. It contains all example numbers in new line. Get next example number after question_numbers.get(key, 1)
             current_number = question_numbers.get(key, 1)
             try:
                 with open("example-numbers.txt", "r") as f:
@@ -245,8 +244,7 @@ async def process_pdf(
     board: str = Form(...),
     source: str = Form(...),
     chapterNo: str = Form(...),
-    exerciseNo: str = Form(...),
-    lastQuestionNumber: int = Form(...)
+    exerciseNo: str = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
     logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
@@ -270,6 +268,9 @@ async def process_pdf(
             raise HTTPException(status_code=500, detail=f"Error extracting text from PDF: {e}")
 
         next_question_number = get_next_question_number(board, source, subjectCode, gradeCode, topicCode, chapterNo)
+        if(next_question_number == "END"):
+            logger.info("Processed till last question. Stopping the process.")
+            os._exit(0)
         # Construct the final prompt for Gemini
         final_prompt = f"""{prompt}\n\n
                         Based on the content of the following PDF:\n\n{pdf_text}

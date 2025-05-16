@@ -62,8 +62,7 @@ Sample xml response:
             'postedByUserId': '6810b82fb49f7e3b1f0460ea',
             'board': 'CBSE',
             'source': 'NCERT Maths',
-            'chapterNo': '2',
-            'lastQuestionNumber': 6
+            'chapterNo': '2'
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")

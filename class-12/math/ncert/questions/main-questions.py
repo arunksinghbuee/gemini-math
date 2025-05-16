@@ -63,7 +63,6 @@ def call_process_pdf_api(attempt):
                     'board': 'CBSE',
                     'source': 'NCERT Maths',
                     'chapterNo': '1',
-                    'lastQuestionNumber': 16,
                     'exerciseNo': '1.1'
 }
         
