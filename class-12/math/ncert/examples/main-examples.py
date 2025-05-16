@@ -14,7 +14,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-FILE_PATH = "../book/ch-2/lemh102-examples.pdf"
 CLASS_NAME = "class 12"
 CHAPTER_NUMBER = "2"
 STATUS = "PUBLISHED"
@@ -32,7 +31,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': (Path(FILE_PATH).stem, open(FILE_PATH, 'rb'), 'application/pdf')
+            'pdf_file': ('ex-2.1.pdf', open('../book/ch-2/ex-2.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {

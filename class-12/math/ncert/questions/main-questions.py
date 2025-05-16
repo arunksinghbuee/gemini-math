@@ -14,7 +14,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-FILE_PATH = "../math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf"
 CLASS_NAME = "class 12"
 CHAPTER_NUMBER = "1"
 EXERCISE_NUMBER = "1.1"
@@ -34,7 +33,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': (Path(FILE_PATH).stem, open(FILE_PATH, 'rb'), 'application/pdf')
+            'pdf_file': ('ex-2.1.pdf', open('../book/ch-2/ex-2.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
