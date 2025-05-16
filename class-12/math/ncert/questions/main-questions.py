@@ -14,6 +14,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+FILE_PATH = "../math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf"
+CLASS_NAME = "class 12"
+CHAPTER_NUMBER = "1"
+EXERCISE_NUMBER = "1.1"
+
+STATUS = "PUBLISHED"
+GRADE_CODE = "GRADE_12"
+SUBJECT_CODE = "MATH"
+TOPIC_CODE = "REL_AND_FUNC"
+POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
+BOARD = "CBSE"
+SOURCE = "NCERT Maths"
+
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
     try:
@@ -21,15 +34,15 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-1.1.pdf', open('../math/class-12/ncert/ch-1/ncert-math-exercise-1.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': (Path(FILE_PATH).stem, open(FILE_PATH, 'rb'), 'application/pdf')
         }
         
         data = {
-            'prompt': """You are a professional mathematics teacher of class 12.
-                    You need to solve questions provied in the exercise 1.1.
+            'prompt': f"""You are a professional mathematics teacher of {CLASS_NAME}.
+                    You need to solve questions provied in the exercise {EXERCISE_NUMBER}.
 
                     Title in en language must be exact same as question in PDF file.
-                    Write solution for the each question considering level of class 12.
+                    Write solution for the each question considering level of {CLASS_NAME}.
                     Write explanation of the solution.
                     Make sure that solution should not look like AI generated.
                     DifficultyLevelCode should EASY, MEDIUM, HARD. Provide best suggestion.
@@ -55,15 +68,15 @@ def call_process_pdf_api(attempt):
                         <questionNo>Example <exampleNo></questionNo>
                     </question>
                 """,
-                    'status': 'PUBLISHED',
-                    'gradeCode': 'GRADE_12',
-                    'subjectCode': 'MATH',
-                    'topicCode': 'REL_AND_FUNC',
-                    'postedByUserId': '6810b82fb49f7e3b1f0460ea',
-                    'board': 'CBSE',
-                    'source': 'NCERT Maths',
-                    'chapterNo': '1',
-                    'exerciseNo': '1.1'
+                    'status': STATUS,
+                    'gradeCode': GRADE_CODE,
+                    'subjectCode': SUBJECT_CODE,
+                    'topicCode': TOPIC_CODE,
+                    'postedByUserId': POSTED_BY_USER_ID,
+                    'board': BOARD,
+                    'source': SOURCE,
+                    'chapterNo': CHAPTER_NUMBER,
+                    'exerciseNo': EXERCISE_NUMBER
 }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
@@ -100,12 +113,6 @@ def main():
         else:
             logger.error(f"Attempt {i}: Failed to process response")
         
-        # if result contains "Example 26" or "Consider a function" then break the loop
-        #if "Example 26" in result or "Consider a function" in result:
-        #    logger.info(f"Breaking loop, reached to last question.")
-        #    break
-
-        # Add a small delay between calls to avoid overwhelming the server
         if i < 50:  # Don't wait after the last call
             logger.info(f"Waiting before next attempt...")
             time.sleep(10)  # 10 second delay between calls

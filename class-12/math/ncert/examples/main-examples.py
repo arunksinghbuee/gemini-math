@@ -14,6 +14,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+FILE_PATH = "../book/ch-2/lemh102-examples.pdf"
+CLASS_NAME = "class 12"
+CHAPTER_NUMBER = "2"
+STATUS = "PUBLISHED"
+GRADE_CODE = "GRADE_12"
+SUBJECT_CODE = "MATH"
+TOPIC_CODE = "INV_TRIG_FUNC"
+POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
+BOARD = "CBSE"
+SOURCE = "NCERT Maths"
+
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
     try:
@@ -21,11 +32,11 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('lemh102-examples.pdf', open('../book/ch-2/lemh102-examples.pdf', 'rb'), 'application/pdf')
+            'pdf_file': (Path(FILE_PATH).stem, open(FILE_PATH, 'rb'), 'application/pdf')
         }
         
         data = {
-            'prompt': """You are a professional mathematics teacher of class 12.
+            'prompt': f"""You are a professional mathematics teacher of {CLASS_NAME}.
                     Read example and its solution from attached PDF file.
                     Title and solution in en language must be exacted same as in PDF file.
                     Example has its solution just after the example. Use that solution rather than creating your own solution.
@@ -55,14 +66,14 @@ Sample xml response:
         <questionNo>Example <exampleNo></questionNo>
     </question>
 """,
-            'status': 'PUBLISHED',
-            'gradeCode': 'GRADE_12',
-            'subjectCode': 'MATH',
-            'topicCode': 'INV_TRIG_FUNC',
-            'postedByUserId': '6810b82fb49f7e3b1f0460ea',
-            'board': 'CBSE',
-            'source': 'NCERT Maths',
-            'chapterNo': '2'
+            'status': STATUS,
+            'gradeCode': GRADE_CODE,
+            'subjectCode': SUBJECT_CODE,
+            'topicCode': TOPIC_CODE,
+            'postedByUserId': POSTED_BY_USER_ID,
+            'board': BOARD,
+            'source': SOURCE,
+            'chapterNo': CHAPTER_NUMBER
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
