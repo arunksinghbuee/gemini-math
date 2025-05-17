@@ -23,6 +23,7 @@ TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
+EXERCISE_CODE = "EXAMPLES"
 
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
@@ -72,7 +73,8 @@ Sample xml response:
             'postedByUserId': POSTED_BY_USER_ID,
             'board': BOARD,
             'source': SOURCE,
-            'chapterNo': CHAPTER_NUMBER
+            'chapterNo': CHAPTER_NUMBER,
+            'exerciseCode': EXERCISE_CODE
         }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
