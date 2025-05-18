@@ -15,11 +15,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 12"
-CHAPTER_NUMBER = "1"
+CHAPTER_NUMBER = "2"
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-12"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
+TOPIC_CODE = "INVERSE-TRIGONOMETRIC-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -32,7 +32,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('lemh101.pdf', open('../book/ch-1/lemh101.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('lemh102-examples.pdf', open('../book/ch-2/lemh102-examples.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
