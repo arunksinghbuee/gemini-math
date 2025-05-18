@@ -244,10 +244,10 @@ async def process_pdf(
     board: str = Form(...),
     source: str = Form(...),
     chapterNo: str = Form(...),
-    exerciseNo: str = Form(...)
+    exerciseCode: str = Form(...)
 ):
     logger.info(f"Received PDF processing request for file: {pdf_file.filename}")
-    logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}")
+    logger.info(f"Parameters - Board: {board}, Source: {source}, Subject: {subjectCode}, Grade: {gradeCode}, Topic: {topicCode}, Chapter: {chapterNo}, Exercise: {exerciseCode}")
 
     if not pdf_file.filename.endswith(".pdf"):
         logger.error(f"Invalid file format received: {pdf_file.filename}")
@@ -312,7 +312,7 @@ async def process_pdf(
                 source=source,
                 chapterNo=chapterNo,
                 seqNumber=next_sequence_number,
-                exerciseNo=exerciseNo
+                exerciseCode=exerciseCode
             )
             
             # Create question using API
@@ -335,7 +335,7 @@ async def process_pdf(
         logger.error(f"Error processing request: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing request: {e}")
 
-def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, postedByUserId, board, source, chapterNo, seqNumber, exerciseNo):
+def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, postedByUserId, board, source, chapterNo, seqNumber, exerciseCode):
     """Format the question JSON with additional metadata."""
     try:
         # Ensure json_data is a dictionary
@@ -353,7 +353,7 @@ def format_question_json(json_data, status, gradeCode, subjectCode, topicCode, p
             "source": source,
             "chapterNo": chapterNo,
             "seqNumber": seqNumber,
-            "exerciseNo": exerciseNo
+            "exerciseCode": exerciseCode
         })
         
         return json_data

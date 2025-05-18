@@ -17,11 +17,12 @@ logger = logging.getLogger(__name__)
 CLASS_NAME = "class 12"
 CHAPTER_NUMBER = "1"
 EXERCISE_NUMBER = "1.1"
+EXERCISE_CODE = "EXERCISE-1-1"
 
 STATUS = "PUBLISHED"
-GRADE_CODE = "GRADE_12"
+GRADE_CODE = "GRADE-12"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "REL_AND_FUNC"
+TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -33,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-2.1.pdf', open('../book/ch-2/ex-2.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('lemh101-ex-1.1.pdf', open('../book/ch-1/lemh101-ex-1.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
@@ -75,7 +76,7 @@ def call_process_pdf_api(attempt):
                     'board': BOARD,
                     'source': SOURCE,
                     'chapterNo': CHAPTER_NUMBER,
-                    'exerciseNo': EXERCISE_NUMBER
+                    'exerciseCode': EXERCISE_CODE
 }
         
         logger.info(f"Attempt {attempt}: Calling process_pdf API")
