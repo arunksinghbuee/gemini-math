@@ -15,14 +15,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 12"
-CHAPTER_NUMBER = "1"
-#EXERCISE_NUMBER = "1.2"
-EXERCISE_CODE = "MISCELLANEOUS-EXERCISE-CHAPTER-1"
+CHAPTER_NUMBER = "2"
+EXERCISE_NUMBER = "2.1"
+EXERCISE_CODE = "EXERCISE-2-1"
 
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-12"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
+TOPIC_CODE = "INVERSE-TRIGONOMETRIC-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -34,12 +34,12 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('lemh101-ch-1-misc.pdf', open('../book/ch-1/lemh101-ch-1-misc.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-2.1.pdf', open('../class-12/math/ncert/book/ch-2/ex-2.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
             'prompt': f"""You are a professional mathematics teacher of {CLASS_NAME}.
-                    You need to solve questions provied in the Miscellaneous Exercise on Chapter {CHAPTER_NUMBER}.
+                    You need to solve questions provied in the Exercise {EXERCISE_NUMBER}.
 
                     Title in en language must be exact same as question in PDF file.
                     Write solution for the each question considering level of {CLASS_NAME}.
