@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 12"
 CHAPTER_NUMBER = "2"
-EXERCISE_NUMBER = "2.1"
-EXERCISE_CODE = "EXERCISE-2-1"
+EXERCISE_NUMBER = "2.2"
+EXERCISE_CODE = "EXERCISE-2-2"
 
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-12"
@@ -34,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ex-2.1.pdf', open('../class-12/math/ncert/book/ch-2/ex-2.1.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ex-2.2.pdf', open('../book/ch-2/ex-2.2.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
