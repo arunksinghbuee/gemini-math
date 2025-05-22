@@ -14,12 +14,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-CLASS_NAME = "class 12"
-CHAPTER_NUMBER = "4"
+CLASS_NAME = "class 11"
+CHAPTER_NUMBER = "1"
 STATUS = "PUBLISHED"
-GRADE_CODE = "GRADE-12"
+GRADE_CODE = "GRADE-11"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "DETERMINANTS"
+TOPIC_CODE = "SETS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -28,11 +28,11 @@ EXERCISE_CODE = "EXAMPLES"
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
     try:
-        url = "http://localhost:8000/process_pdf"        
+        url = "http://localhost:8000/process_pdf"
         
         # Form data
         files = {
-            'pdf_file': ('ch-4-examples.pdf', open('../book/ch-4/ch-4-examples.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('ch-1-examples.pdf', open('../book/ch-1/ch-1-examples.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
