@@ -15,11 +15,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 11"
-CHAPTER_NUMBER = "1"
+CHAPTER_NUMBER = "2"
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-11"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "SETS"
+TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -32,7 +32,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('ch-1-examples.pdf', open('../book/ch-1/ch-1-examples.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11ch-2-examples.pdf', open('../book/ch-2/ch-2-examples.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
