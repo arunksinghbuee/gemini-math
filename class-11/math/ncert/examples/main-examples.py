@@ -23,7 +23,7 @@ TOPIC_CODE = "SETS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
-EXERCISE_CODE = "EXAMPLES"
+EXERCISE_CODE = "EXAMPLES-1"
 
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
