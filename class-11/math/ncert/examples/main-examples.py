@@ -23,7 +23,7 @@ TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
-EXERCISE_CODE = "EXAMPLES-1"
+EXERCISE_CODE = "NCERT-EXAMPLES-1"
 
 def call_process_pdf_api(attempt):
     """Call the process_pdf API with the given attempt number."""
@@ -32,7 +32,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('class-11ch-2-examples.pdf', open('../book/ch-2/ch-2-examples.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11-ch-2-examples.pdf', open('../book/ch-2/class-11-ch-2-examples.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
