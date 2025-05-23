@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 11"
 GRADE_CODE = "GRADE-11"
-CHAPTER_NUMBER = "2"
-EXERCISE_NUMBER = "2.3"
-EXERCISE_CODE = "NCERT-EXERCISE-2.3"
-TOPIC_CODE = "RELATIONS-AND-FUNCTIONS"
+CHAPTER_NUMBER = "3"
+EXERCISE_NUMBER = "3.1"
+EXERCISE_CODE = "NCERT-EXERCISE-3.1"
+TOPIC_CODE = "TRIGONOMETRIC-FUNCTIONS"
 
 STATUS = "PUBLISHED"
 SUBJECT_CODE = "MATH"
@@ -34,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('class-11-ex-2.3.pdf', open('../book/ch-2/ex-2.3.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11-ex-3.1.pdf', open('../book/ch-3/ex-3.1.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
