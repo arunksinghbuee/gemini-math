@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 CLASS_NAME = "class 11"
 GRADE_CODE = "GRADE-11"
 CHAPTER_NUMBER = "6"
-EXERCISE_NUMBER = "6.2"
-EXERCISE_CODE = "NCERT-EXERCISE-6.2"
+EXERCISE_NUMBER = "6.3"
+EXERCISE_CODE = "NCERT-EXERCISE-6.3"
 TOPIC_CODE = "PERMUTATIONS-AND-COMBINATIONS"
 
 STATUS = "PUBLISHED"
@@ -34,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('class-11-ex-6.2.pdf', open('../book/ch-6/ex-6.2.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11-ex-6.3.pdf', open('../book/ch-6/ex-6.3.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
