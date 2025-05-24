@@ -15,9 +15,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 11"
-CHAPTER_NUMBER = "5"
+CHAPTER_NUMBER = "6"
 #EXERCISE_NUMBER = "2.2"
-EXERCISE_CODE = "NCERT-MISCELLANEOUS-EXERCISE-CHAPTER-5"
+EXERCISE_CODE = "NCERT-MISCELLANEOUS-EXERCISE-CHAPTER-6"
 
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-11"
@@ -34,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('class-11-misc-ch-5.pdf', open('../book/ch-5/misc-ex-5.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11-misc-ch-6.pdf', open('../book/ch-6/misc-ex-6.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
