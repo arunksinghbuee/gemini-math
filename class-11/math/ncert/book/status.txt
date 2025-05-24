@@ -1,6 +1,6 @@
 ch-1 --> Done
-ch-2
-ch-3
+ch-2 --> Done
+ch-3 --> Done
 ch-4
 ch-5
 ch-6
