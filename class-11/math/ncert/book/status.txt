@@ -3,8 +3,8 @@ ch-2 --> Done
 ch-3 --> Done
 ch-4 --> Done
 ch-5 --> Done
-ch-6 --> In Progress
-ch-7
+ch-6 --> Done
+ch-7 --> In Progress
 ch-8
 ch-9
 ch-10

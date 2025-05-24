@@ -15,14 +15,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CLASS_NAME = "class 11"
-CHAPTER_NUMBER = "6"
+CHAPTER_NUMBER = "7"
 #EXERCISE_NUMBER = "2.2"
-EXERCISE_CODE = "NCERT-MISCELLANEOUS-EXERCISE-CHAPTER-6"
+EXERCISE_CODE = "NCERT-MISCELLANEOUS-EXERCISE-CHAPTER-7"
 
 STATUS = "PUBLISHED"
 GRADE_CODE = "GRADE-11"
 SUBJECT_CODE = "MATH"
-TOPIC_CODE = "PERMUTATIONS-AND-COMBINATIONS"
+TOPIC_CODE = "BINOMIAL-THEOREM"
 POSTED_BY_USER_ID = "6810b82fb49f7e3b1f0460ea"
 BOARD = "CBSE"
 SOURCE = "NCERT Maths"
@@ -34,7 +34,7 @@ def call_process_pdf_api(attempt):
         
         # Form data
         files = {
-            'pdf_file': ('class-11-misc-ch-6.pdf', open('../book/ch-6/misc-ex-6.pdf', 'rb'), 'application/pdf')
+            'pdf_file': ('class-11-misc-ch-7.pdf', open('../book/ch-7/misc-ch-7.pdf', 'rb'), 'application/pdf')
         }
         
         data = {
